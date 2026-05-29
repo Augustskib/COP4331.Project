@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ContactVault — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f3ef; --surface: #ffffff; --border: #e0ddd7;
+      --text: #1a1916; --muted: #6b6860;
+      --accent: #2b5ce6; --accent-hover: #1e47c8;
+      --danger: #c0392b; --danger-light: #fdf0ef;
+      --success: #1a7a4a; --success-light: #edf7f2;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    .page-wrap { display: flex; width: 100%; max-width: 860px; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+    .brand-panel { background: #1a1916; color: #fff; padding: 3rem 2.5rem; width: 340px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
+    .brand-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 3rem; }
+    .brand-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+    .brand-icon svg { width: 20px; height: 20px; fill: #fff; }
+    .brand-name { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: #fff; }
+    .brand-headline { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1.25; color: #fff; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    .brand-sub { font-size: 0.88rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .brand-features { list-style: none; margin-top: 2.5rem; }
+    .brand-features li { font-size: 0.83rem; color: rgba(255,255,255,0.6); padding: 0.4rem 0; display: flex; align-items: center; gap: 8px; }
+    .brand-features li::before { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+    .form-panel { flex: 1; padding: 3rem 2.5rem; display: flex; flex-direction: column; justify-content: center; }
+    .tab-row { display: flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 2rem; }
+    .tab-btn { flex: 1; padding: 0.65rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; background: transparent; border: none; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+    .tab-btn:not(.active):hover { background: var(--bg); }
+    .form-title { font-family: 'DM Serif Display', serif; font-size: 1.55rem; color: var(--text); letter-spacing: -0.025em; margin-bottom: 0.35rem; }
+    .form-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.75rem; }
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text); margin-bottom: 0.4rem; }
+    .field input { width: 100%; padding: 0.65rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,92,230,0.1); background: #fff; }
+    .field input::placeholder { color: #b0ada6; }
+    .submit-btn { width: 100%; padding: 0.75rem; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: background 0.15s, transform 0.1s; margin-top: 0.5rem; }
+    .submit-btn:hover { background: var(--accent-hover); }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .alert { padding: 0.7rem 0.9rem; border-radius: var(--radius); font-size: 0.84rem; margin-bottom: 1rem; display: none; }
+    .alert.error { background: var(--danger-light); color: var(--danger); display: block; }
+    .alert.success { background: var(--success-light); color: var(--success); display: block; }
+    .form-pane { display: none; }
+    .form-pane.active { display: block; }
+    @media (max-width: 640px) { .page-wrap { flex-direction: column; } .brand-panel { width: 100%; padding: 2rem; } .form-panel { padding: 2rem 1.5rem; } }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="brand-panel">
+    <div>
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <span class="brand-name">ContactVault</span>
+      </div>
+      <h1 class="brand-headline">Your contacts,<br>organized.</h1>
+      <p class="brand-sub">A personal contact manager built to keep your people close and your data private.</p>
+      <ul class="brand-features">
+        <li>Add, search, edit &amp; delete contacts</li>
+        <li>Private to your account only</li>
+        <li>Fast partial-match search</li>
+        <li>Clean, professional interface</li>
+      </ul>
+    </div>
+    <p style="font-size:0.75rem;color:rgba(255,255,255,0.25);">© 2025 ContactVault</p>
+  </div>
+
+  <div class="form-panel">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-pane active" id="pane-login">
+      <h2 class="form-title">Welcome back</h2>
+      <p class="form-subtitle">Sign in to access your contacts</p>
+      <div class="alert" id="login-alert"></div>
+      <div class="field">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" placeholder="e.g. RickL" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="submit-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-pane" id="pane-register">
+      <h2 class="form-title">Create account</h2>
+      <p class="form-subtitle">It's free. No credit card needed.</p>
+      <div class="alert" id="register-alert"></div>
+      <div class="field">
+        <label for="reg-first">First Name</label>
+        <input type="text" id="reg-first" placeholder="Jane" autocomplete="given-name" />
+      </div>
+      <div class="field">
+        <label for="reg-last">Last Name</label>
+        <input type="text" id="reg-last" placeholder="Doe" autocomplete="family-name" />
+      </div>
+      <div class="field">
+        <label for="reg-username">Username</label>
+        <input type="text" id="reg-username" placeholder="e.g. JaneD" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="reg-password">Password</label>
+        <input type="password" id="reg-password" placeholder="At least 8 characters" autocomplete="new-password" />
+      </div>
+      <button class="submit-btn" id="register-btn" onclick="doRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── CHANGE THIS TO YOUR REAL SERVER URL ─────────────────
+  const API_BASE = 'https://YOUR-SERVER-HERE/LAMPAPI';
+  // ────────────────────────────────────────────────────────
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.getElementById('pane-login').classList.toggle('active', tab === 'login');
+    document.getElementById('pane-register').classList.toggle('active', tab === 'register');
+  }
+
+  function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'alert ' + type;
+  }
+
+  function clearAlert(id) {
+    const el = document.getElementById(id);
+    el.className = 'alert';
+    el.textContent = '';
+  }
+
+  async function doLogin() {
+    clearAlert('login-alert');
+    const login    = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    if (!login || !password) {
+      showAlert('login-alert', 'Please enter your username and password.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+
+    try {
+      const res = await fetch(`${API_BASE}/Login.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login, password })
+      });
+      const data = await res.json();
+
+      if (data.id && data.id > 0 && !data.error) {
+        sessionStorage.setItem('userId', data.id);
+        sessionStorage.setItem('firstName', data.firstName || '');
+        sessionStorage.setItem('lastName', data.lastName || '');
+        window.location.href = 'contacts.html';
+      } else {
+        showAlert('login-alert', data.error || 'Invalid username or password.', 'error');
+      }
+    } catch (err) {
+      showAlert('login-alert', 'Could not connect to server. Please try again.', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
+  }
+
+  async function doRegister() {
+    clearAlert('register-alert');
+    const firstName = document.getElementById('reg-first').value.trim();
+    const lastName  = document.getElementById('reg-last').value.trim();
+    const login     = document.getElementById('reg-username').value.trim();
+    const password  = document.getElementById('reg-password').value;
+
+    if (!firstName || !lastName || !login || !password) {
+      showAlert('register-alert', 'All fields are required.', 'error');
+      return;
+    }
+    if (password.length < 8) {
+      showAlert('register-alert', 'Password must be at least 8 characters.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('register-btn');
+    btn.disabled = true; btn.textContent = 'Creating account…';
+
+    try {
+      const res = await fetch(`${API_BASE}/Registration.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, login, password })
+      });
+      const data = await res.json();
+
+      if (data.id && data.id > 0 && !data.error) {
+        showAlert('register-alert', 'Account created! Please sign in.', 'success');
+        setTimeout(() => switchTab('login'), 1500);
+      } else {
+        showAlert('register-alert', data.error || 'Registration failed. Username may already exist.', 'error');
+      }
+    } catch (err) {
+      showAlert('register-alert', 'Could not connect to server. Please try again.', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Account';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('pane-login').classList.contains('active')) doLogin();
+    else doRegister();
+  });
+
+  if (sessionStorage.getItem('userId')) window.location.href = 'contacts.html';
+</script>
+</body>
+</html>

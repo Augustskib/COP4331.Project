@@ -1,0 +1,272 @@
+/* ----------------------------------------------------------
+   GLOBAL RESET — normalize spacing + sizing across browsers
+---------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------
+   THEME VARIABLES — colors, radius, shadows, etc.
+   Makes the whole UI easy to tweak from one place.
+---------------------------------------------------------- */
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --border: #e0ddd7;
+  --text: #1a1916;
+  --muted: #6b6860;
+
+  /* Updated blue theme */
+  --accent: #2f8df7;        /* button + links */
+  --accent-hover: #1f6ed1;  /* darker hover */
+
+  --danger: #c0392b;
+  --danger-light: #fdf0ef;
+  --success: #1a7a4a;
+  --success-light: #edf7f2;
+
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* ----------------------------------------------------------
+   BODY — full-screen blue background + centers login box
+---------------------------------------------------------- */
+body {
+  font-family: 'DM Sans', sans-serif;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #2f8df7; /* updated richer blue */
+
+  padding: 2rem 1rem;
+}
+
+/* ----------------------------------------------------------
+   PAGE-WRAP — the single white login card
+---------------------------------------------------------- */
+.page-wrap {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+
+  width: 420px;
+  min-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 2.5rem;
+}
+
+/* ----------------------------------------------------------
+   FORM PANEL — container for all login elements
+---------------------------------------------------------- */
+.form-panel {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ----------------------------------------------------------
+   HEADER TEXT — "Login to Account" + subtitle
+---------------------------------------------------------- */
+.header-text {
+  text-align: center;
+  margin-bottom: 2.4rem;
+}
+
+.header-title {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: #2a2a2a; /* soft dark grey */
+  margin-bottom: 0.9rem;
+}
+
+.header-subtitle {
+  font-size: 0.9rem;
+  color: #3a3a3a; /* slightly lighter grey */
+  text-align: center;
+  line-height: 1.45;
+}
+
+/* ----------------------------------------------------------
+   FORM TITLES + SUBTITLES (inside login form)
+---------------------------------------------------------- */
+.form-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.55rem;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+
+.form-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+/* Center the bottom "Don't have an account?" line */
+.bottom-link {
+  text-align: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+/* ----------------------------------------------------------
+   LINKS — Create Account, Forgot Password, etc.
+---------------------------------------------------------- */
+.link-create {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-create:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   FORM FIELDS — labels + inputs
+---------------------------------------------------------- */
+.field {
+  margin-bottom: 1.1rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(43,92,230,0.1);
+  background: #fff;
+}
+
+/* ----------------------------------------------------------
+   PASSWORD ROW — "Password" + "Forgot password?"
+---------------------------------------------------------- */
+.password-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   REMEMBER PASSWORD — checkbox + label
+---------------------------------------------------------- */
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.remember-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.remember-label {
+  font-size: 0.78rem;
+  color: #8a8a8a;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ----------------------------------------------------------
+   SUBMIT BUTTON — "Sign In"
+---------------------------------------------------------- */
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* ----------------------------------------------------------
+   ALERTS — success + error messages
+---------------------------------------------------------- */
+.alert {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.84rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.alert.error {
+  background: var(--danger-light);
+  color: var(--danger);
+  display: block;
+}
+
+.alert.success {
+  background: var(--success-light);
+  color: var(--success);
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   FORM PANES — used for login/register switching
+---------------------------------------------------------- */
+.form-pane {
+  display: none;
+}
+
+.form-pane.active {
+  display: block;
+}
