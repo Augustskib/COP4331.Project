@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ContactVault — Sign In</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/LogIn.Styles.css" />
+</head>
+
+<body>
+
+<!-- ----------------------------------------------------------
+     PAGE WRAPPER — centered white login card
+----------------------------------------------------------- -->
+<div class="page-wrap">
+
+  <!-- --------------------------------------------------------
+       FORM PANEL — contains header + login form
+  --------------------------------------------------------- -->
+  <div class="form-panel">
+
+    <!-- Header text (title + subtitle) -->
+    <div class="header-text">
+      <h2 class="header-title">Login to Account</h2>
+      <p class="header-subtitle">Please enter your email and password to continue</p>
+    </div>
+
+    <!-- ------------------------------------------------------
+         LOGIN FORM
+    ------------------------------------------------------- -->
+    <div class="form-pane active" id="pane-login">
+
+      <!-- Alert area (errors / success messages) -->
+      <div class="alert" id="login-alert"></div>
+
+      <!-- Email field -->
+      <div class="field">
+        <label for="login-username">Email Address</label>
+        <input type="text" id="login-username" placeholder="e.g. RickL" autocomplete="username" />
+      </div>
+
+      <!-- Password label + Forgot Password link -->
+      <div class="password-row">
+        <label for="login-password">Password</label>
+        <a href="forgot.html" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <!-- Password input -->
+      <div class="field">
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <!-- Remember password checkbox -->
+      <div class="remember-row">
+        <input type="checkbox" id="remember-password" class="remember-checkbox" />
+        <label for="remember-password" class="remember-label">Remember password</label>
+      </div>
+
+      <!-- Sign In button -->
+      <button class="submit-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+
+      <!-- Bottom link: Create Account -->
+      <p class="form-subtitle bottom-link">
+        Don't have an account?
+        <a href="register.html" class="link-create">Create Account</a>
+      </p>
+
+    </div>
+
+    <!-- ------------------------------------------------------
+         REGISTER PANE (not used yet — will move to register.html)
+    ------------------------------------------------------- -->
+    <div class="form-pane" id="pane-register">
+      <h2 class="form-title">Create account</h2>
+      <p class="form-subtitle">It's free. No credit card needed.</p>
+
+      <div class="alert" id="register-alert"></div>
+
+      <div class="field">
+        <label for="reg-first">First Name</label>
+        <input type="text" id="reg-first" placeholder="Jane" autocomplete="given-name" />
+      </div>
+
+      <div class="field">
+        <label for="reg-last">Last Name</label>
+        <input type="text" id="reg-last" placeholder="Doe" autocomplete="family-name" />
+      </div>
+
+      <div class="field">
+        <label for="reg-username">Username</label>
+        <input type="text" id="reg-username" placeholder="e.g. JaneD" autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="reg-password">Password</label>
+        <input type="password" id="reg-password" placeholder="At least 8 characters" autocomplete="new-password" />
+      </div>
+
+      <button class="submit-btn" id="register-btn" onclick="doRegister()">Create Account</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ----------------------------------------------------------
+     JAVASCRIPT FILES — tab switching, alerts, authentication
+----------------------------------------------------------- -->
+<script src="tabs.js"></script>
+<script src="alerts.js"></script>
+<script src="auth.js"></script>
+
+</body>
+</html>

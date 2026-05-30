@@ -1,0 +1,175 @@
+/* RESET */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* BODY — SAME BLUE AS SIGN IN */
+body {
+  font-family: 'DM Sans', sans-serif;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2f8df7; /* FIXED */
+  padding: 2rem 1rem;
+}
+
+/* CARD — EXACT MATCH TO SIGN IN */
+.page-wrap {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  width: 420px;
+  min-height: 420px; /* FIXED */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem; /* FIXED */
+}
+
+/* PANEL */
+.form-panel {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER — EXACT MATCH */
+.header-text {
+  text-align: center;
+  margin-bottom: 2.4rem; /* FIXED */
+}
+
+.header-title {
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #2a2a2a;
+  margin-bottom: 0.9rem;
+}
+
+.header-subtitle {
+  font-size: 0.9rem;
+  color: #3a3a3a;
+}
+
+/* BUTTON — EXACT MATCH */
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #2f8df7;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.submit-btn:hover {
+  background: #1f6ed1;
+}
+
+/* ----------------------------------------------------------
+   404 ILLUSTRATION
+---------------------------------------------------------- */
+.error-illustration {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.error-window {
+  width: 260px;
+  height: 260px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Top bar */
+.error-topbar {
+  height: 38px;
+  background: #f3f3f3;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+}
+
+/* Colored dots */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.red { background: #ff5f57; }
+.yellow { background: #ffbd2e; }
+.green { background: #28c840; }
+
+/* Address bar */
+.address-bar {
+  height: 14px;
+  width: 120px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  margin-left: 10px;
+}
+
+/* Blue content area — FIXED TO MATCH SIGN IN THEME */
+.error-body {
+  background: #2f8df7; /* This is the illustration's blue — NOT the page background */
+  height: calc(100% - 38px);
+  position: relative;
+  padding-top: 22px;
+  text-align: center;
+}
+
+/* Funky orange 404 */
+.error-404 {
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: #ff7a00;
+  font-family: 'DM Serif Display', serif;
+  letter-spacing: -2px;
+}
+
+/* White cylinders */
+.cylinders {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cylinder {
+  width: 55px;
+  height: 14px;
+  background: white;
+  border-radius: 20px;
+}
+
+/* Right-side dots */
+.side-dots {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-dots span {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
