@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-------------------
+            Navigation
+        --------------------->
+        <aside class="sidebar">
+            <div class="brand-logo">
+                <img src="globe-icon-placeholder.png" alt="Contact Manager Logo">
+                <h1>Contact Manager</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#contacts">Contacts List</a></li>
+                    <li><a href="#add-contact">Add Contact</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#logout" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <!-------------------------------
+                        Header
+            -------------------------------->
+            <header class="top-header">
+                <div class="search-container">
+                    <form action="/search" method="GET">
+                        <input type="search" id="contact-search" name="q" placeholder="Search contacts...">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                <div class="user-controls">
+       
+                    <div class="user-profile">
+                        <img src="avatar-moni.png" alt="Moni Roy" class="avatar">
+                        <div class="user-info">
+                            <span class="user-name">Moni Roy</span>
+                            <span class="user-role">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-------------------
+                Your Contacts
+            --------------------->
+            <main class="main-content">
+
+                <section class="contacts-widget">
+    
+                    <header class="widget-header">
+                        <h2>Your Contacts</h2>
+                        <span class="contact-count-label">12 contacts</span>
+                    </header>
+
+                    <div class="empty-state-card" id="empty-state">
+    
+                        <div class="empty-state-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="contact-icon">
+                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                                <path d="M7 21v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2"></path>
+                            </svg>
+                        </div>
+
+                        <h3 class="empty-state-title">No contacts yet</h3>
+                        <p class="empty-state-description">You haven't added any contacts yet.</p>
+
+                        <button class="primary-btn add-contact-btn" id="add-first-contact-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="plus-icon">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add your first contact
+                        </button>
+
+                    </div>
+
+                    <ul class="contact-list">
+                        
+                        <li class="contact-card">
+                            <img src="avatar-john.jpg" alt="John Doe" class="contact-avatar">
+                            
+                            <div class="contact-info">
+                                <h3 class="contact-name">John Doe</h3>
+                                <p class="contact-detail">+1 (555) 123-4567</p>
+                            </div>
+                            
+                            <div class="contact-actions">
+                                <button class="action-btn call-btn" aria-label="Call John Doe">📞</button>
+                                <button class="action-btn email-btn" aria-label="Email John Doe">✉️</button>
+                                <button class="action-btn options-btn" aria-label="More options">⋮</button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <footer class="widget-footer">
+                        <button id="load-more-btn">
+                            Load more 
+                            <span class="chevron-down">⌄</span>
+                        </button>
+                    </footer>
+
+                </section>
+
+                <nav class="pagination-container" aria-label="Contacts pagination">
+                    <span class="pagination-info">Showing 1-10 of 55 contacts</span>
+                    <ul class="pagination-controls">
+                        <button>Load More</button>
+                    </ul>
+                </nav>
+
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>
