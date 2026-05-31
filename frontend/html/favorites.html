@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites - Contact Manager</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <div class="brand-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                <h1>Contact Manager</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li class="active"><a href="favorites.html">Favorites</a></li>
+                    <li><a href="#add-contact.html">Add Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#logout" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <header class="top-header">
+                <div class="search-container">
+                    <form action="/search" method="GET">
+                        <input type="search" id="contact-search" name="q" placeholder="Search favorites...">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                <div class="user-controls">
+                    <div class="user-profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round"><path d="M17.925 20.056a6 6 0 0 0-11.851.001"/><circle cx="12" cy="11" r="4"/><circle cx="12" cy="12" r="10"/></svg>                        
+                        <div class="user-info">
+                            <span class="user-name">Jaden</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+
+                <section class="contacts-widget">
+    
+                    <header class="widget-header">
+                        <h2>Favorite Contacts</h2>
+                        <span class="contact-count-label">0 favorites</span>
+                    </header>
+
+                    <div class="empty-state-card" id="empty-state">
+    
+                        <div class="empty-state-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+
+                        <h3 class="empty-state-title">No favorites yet</h3>
+                        <p class="empty-state-description">You haven't marked any contacts as a favorite yet.</p>
+
+                        <button class="primary-btn add-contact-btn" id="browse-contacts-btn" onclick="window.location.href='dashboard.html'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                            Browse Contacts
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>

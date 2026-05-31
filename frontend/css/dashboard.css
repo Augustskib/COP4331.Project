@@ -1,6 +1,6 @@
 :root {
-    --primary-blue: #1d6df4;
-    --sidebar-bg: #0d47a1;
+    --primary-blue: #2f8df7;
+    --sidebar-bg: #2f8df7;
     --sidebar-hover: rgba(255, 255, 255, 0.15);
     --bg-color: #fcfcfc;
     --border-color: #e5e7eb;
@@ -230,5 +230,5 @@ body {
 }
 
 .add-contact-btn:hover {
-    background-color: #1557c0; /* Darkens slightly on hover */
+    background-color: #1f6ed1; /* Darkens slightly on hover */
 }
