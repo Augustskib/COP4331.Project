@@ -1,33 +1,51 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("pane-login");
-    const alertBox = document.getElementById("register-alert");
+    const alertBox = document.getElementById("login-alert");
 
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const emailInput = document.getElementById("login-email").value;
+        const usernameInput = document.getElementById("login-username").value;
         const passwordInput = document.getElementById("login-password").value;
 
         const userData = {
-            email: emailInput,
+            login: usernameInput,
             password: passwordInput
         };
 
         try {
             
-            const response = await fetch("/api/auth/register", {
-                method: "Get", // Tells the server that we are using get method which means reading data
+            const response = await fetch("http://contactmanager7.xyz/LAMPAPI/Login.php", {
+                method: "POST", 
                 headers: {
-                    "Content-Type": "application/json" // specifies the type of data being sent (json)
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(userData) // Converting our bundle into text for the trip
+                body: JSON.stringify(userData) 
             });
 
-            console.log("The fetch was sent and the API replied!");
+            const result = await response.json();
+            
+            // If error is found
+            if (result.error !== "") {
+                console.error("Login Failed:", result.error);
+                alertBox.textContent = "Invalid username or password.";
+                alertBox.className = "alert error";
+                alertBox.style.display = "block";
+            } else {
+                console.log("Logged in successfully! User ID:", result.id);
+                
+                alertBox.textContent = "Logging in...";
+                alertBox.className = "alert success";
+                alertBox.style.display = "block";
+
+                // TODO: Save the User ID to localStorage, then redirect to Dashboard.html
+            }
 
         } catch (error) {
-            // catches major network errors (like if your server is offline)
             console.error("The fetch failed entirely:", error);
+            alertBox.textContent = "Could not connect to the server.";
+            alertBox.className = "alert error";
+            alertBox.style.display = "block";
         }
     })
 })
