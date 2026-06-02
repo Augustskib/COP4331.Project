@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("pane-login");
+    const alertBox = document.getElementById("register-alert");
 
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();

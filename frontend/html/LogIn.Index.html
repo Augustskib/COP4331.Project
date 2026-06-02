@@ -23,7 +23,7 @@
 
       <header class="header-text">
         <h1 class="header-title" id="login-heading">Login to Account</h1>
-        <p class="header-subtitle">Please enter your email and password to continue</p>
+        <p class="header-subtitle">Please enter your username and password to continue</p>
       </header>
 
       <form class="form-pane active" id="pane-login" method="POST" action="/api/auth/login" novalidate>
@@ -33,10 +33,10 @@
 
         </div>
 
-        <!-- Email field -->
+        <!-- username field -->
         <div class="field">
-          <label for="login-email">Email Address</label>
-          <input type="email" id="login-email" name="email" placeholder="e.g. rick@email.com" autocomplete="username" required aria-required="true" aria-describedby="login-alert"/>
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" name="username" placeholder="e.g. Jaden" autocomplete="username" required aria-required="true" aria-describedby="login-alert"/>
         </div>
 
         <!-- Password field-->
