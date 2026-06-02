@@ -15,7 +15,7 @@
   />
 
   <!-- Main CSS -->
-  <link rel="stylesheet" href="../css/LogIn.Styles.css" />
+  <link rel="stylesheet" href="../css/CreateAcc.Styles.css" />
 </head>
 
 <body>
@@ -32,11 +32,10 @@
         class="form-pane active"
         id="pane-register"
         method="POST"
-        action="/api/auth/register"
+        action="/LAMPAPI/Registration.php"
         novalidate
       >
 
-        <!-- Live region: inject error/success messages here via JS -->
         <div
           class="alert"
           id="register-alert"
@@ -45,28 +44,42 @@
           aria-atomic="true"
         ></div>
 
-        <!-- Email field -->
-        <div class="field">
-          <label for="reg-email">Email Address</label>
-          <input
-            type="email"
-            id="reg-email"
-            name="email"
-            placeholder="e.g. rick@email.com"
-            autocomplete="email"
-            required
-            aria-required="true"
-            aria-describedby="register-alert"
-          />
+        <div class="field-row">
+          <div class="field">
+            <label for="reg-firstname">First Name</label>
+            <input
+              type="text"
+              id="reg-firstname"
+              name="firstName"
+              placeholder="e.g. Rick"
+              autocomplete="given-name"
+              required
+              aria-required="true"
+              aria-describedby="register-alert"
+            />
+          </div>
+
+          <div class="field">
+            <label for="reg-lastname">Last Name</label>
+            <input
+              type="text"
+              id="reg-lastname"
+              name="lastName"
+              placeholder="e.g. Leinecker"
+              autocomplete="family-name"
+              required
+              aria-required="true"
+              aria-describedby="register-alert"
+            />
+          </div>
         </div>
 
-        <!-- Username field -->
         <div class="field">
           <label for="reg-username">Username</label>
           <input
             type="text"
             id="reg-username"
-            name="username"
+            name="login"
             placeholder="e.g. RickL"
             autocomplete="username"
             required
@@ -75,7 +88,6 @@
           />
         </div>
 
-        <!-- Password field -->
         <div class="field">
           <label for="reg-password">Password</label>
           <input

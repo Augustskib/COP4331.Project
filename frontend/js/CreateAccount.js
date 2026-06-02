@@ -1,34 +1,60 @@
 document.addEventListener("DOMContentLoaded", () => {
     const registerForm = document.getElementById("pane-register");
+    const alertBox = document.getElementById("register-alert");
 
     registerForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const emailInput = document.getElementById("reg-email").value;
+        const firstnameInput = document.getElementById("reg-firstname").value;
+        const lastnameInput = document.getElementById("reg-lastname").value;
         const usernameInput = document.getElementById("reg-username").value;
         const passwordInput = document.getElementById("reg-password").value;
 
+        // FIXED: Keys exactly match the Swagger document
         const userData = {
-            email: emailInput,
-            username: usernameInput,
+            firstName: firstnameInput,
+            lastName: lastnameInput,
+            login: usernameInput,
             password: passwordInput
         };
 
+        // UI Update: Show a loading message to the user
+        alertBox.textContent = "Creating account...";
+        alertBox.className = "alert"; // Reset to default alert class
+        alertBox.style.display = "block"; // Make the box visible
+
         try {
-            
-            const response = await fetch("/api/auth/register", {
-                method: "POST", // Tells the server that we are using post method which means creating data
+            const response = await fetch("http://contactmanager7.xyz/LAMPAPI/Registration.php", {
+                method: "POST", 
                 headers: {
-                    "Content-Type": "application/json" // specifies the type of data being sent (json)
+                    "Content-Type": "application/json" 
                 },
-                body: JSON.stringify(userData) // Converting our bundle into text for the trip
+                body: JSON.stringify(userData) 
             });
 
-            console.log("The fetch was sent and the API replied!");
+            const result = await response.json();
+
+            // Check if there is an error message from the backend
+            if (result.error !== "") {
+                // UI Update: Show the specific error to the user in red
+                alertBox.textContent = result.error;
+                alertBox.className = "alert error"; 
+            } else {
+                // UI Update: Show success message in green
+                alertBox.textContent = "Account created successfully! Redirecting...";
+                alertBox.className = "alert success";
+
+                // The Redirect: Wait 2 seconds, then send them to the login page
+                setTimeout(() => {
+                    window.location.href = "LogIn.Index.html";
+                }, 2000);
+            }
 
         } catch (error) {
-            // catches major network errors (like if your server is offline)
+            // UI Update: Show a network failure message in red
+            alertBox.textContent = "Could not connect to the server. Please try again.";
+            alertBox.className = "alert error";
             console.error("The fetch failed entirely:", error);
         }
-    })
-})
+    });
+});

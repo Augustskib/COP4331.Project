@@ -140,8 +140,21 @@ body {
    FORM FIELDS — labels + inputs
    Slightly increased spacing for Create Account page
 ---------------------------------------------------------- */
+
+.field-row {
+  display: flex;
+  gap: 1rem; /* Adds a clean 16px space between the two boxes */
+}
+
+/* Forces the fields inside the row to take up equal space */
+.field-row .field {
+  flex: 1; 
+  margin-bottom: 1.3rem; 
+}
+
+/* Existing field styling */
 .field {
-  margin-bottom: 1.3rem; /* increased from 1.1rem */
+  margin-bottom: 1.3rem; 
 }
 
 .field label {
@@ -169,7 +182,6 @@ body {
   box-shadow: 0 0 0 3px rgba(43,92,230,0.1);
   background: #fff;
 }
-
 /* ----------------------------------------------------------
    PASSWORD ROW — label + forgot password link
 ---------------------------------------------------------- */
