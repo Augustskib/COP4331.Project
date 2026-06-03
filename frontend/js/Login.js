@@ -38,7 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 alertBox.className = "alert success";
                 alertBox.style.display = "block";
 
-                // TODO: Save the User ID to localStorage, then redirect to Dashboard.html
+                //Save the User ID to localStorage
+                localStorage.setItem("userId", result.id);
+
+                //redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 2000);
             }
 
         } catch (error) {
