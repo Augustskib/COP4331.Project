@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Manager</title>
     <link rel="stylesheet" href="../css/dashboard.css">
-    <script src="../js/dashboard.js"></script>
 </head>
 <body>
 
@@ -24,7 +23,6 @@
                 <ul>
                     <li class="active"><a href="dashboard.html">Dashboard</a></li>
                     <li><a href="#add-contact">Add Contact</a></li>
-                    <!-- <li><a href="#settings">Settings</a></li> (May add later)-->
                 </ul>
             </nav>
 
@@ -43,7 +41,7 @@
                         <input type="search" id="contact-search" name="q" placeholder="Search contacts...">
                         <!-- brandon's code: visible search button + field selector -->
                         <button type="submit" class="search-btn">Search</button>
-                        <select id="search-field" name="field" class="search-field-select">
+                        <select id="search-field" aria-label="Choose what to search by" name="field" class="search-field-select">
                             <option value="first_name">First Name</option>
                             <option value="last_name">Last Name</option>
                             <option value="email">Email</option>
@@ -168,6 +166,6 @@
         </div>
     </div>
     <!-- end brandon's code -->
-
+<script src="../js/dashboard.js"></script>
 </body>
 </html>
