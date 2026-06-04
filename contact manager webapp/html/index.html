@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Manager — Sign In</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/LogIn.Styles.css" />
+</head>
+
+<body>
+  <main class="page-wrap">
+
+    <section class="form-panel" aria-labelledby="login-heading">
+
+      <header class="header-text">
+        <h1 class="header-title" id="login-heading">Login to Account</h1>
+        <p class="header-subtitle">Please enter your username and password to continue</p>
+      </header>
+
+      <form class="form-pane active" id="pane-login" method="POST" action="/api/auth/login" novalidate>
+
+        <!-- error/success notification via js -->
+        <div class="alert" id="login-alert" role="alert" aria-live="polite" aria-atomic="true">
+
+        </div>
+
+        <!-- username field -->
+        <div class="field">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" name="username" placeholder="e.g. Jaden" autocomplete="username" required aria-required="true" aria-describedby="login-alert"/>
+        </div>
+
+        <!-- Password field-->
+        <div class="field">
+          <div class="password-row">
+            <label for="login-password">Password</label>
+          </div>
+          <input type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password" required aria-required="true" aria-describedby="login-alert"/>
+        </div>
+
+        <!-- type="submit" — lets the form submit on Enter key too -->
+        <button class="submit-btn" id="login-btn" type="submit">Sign In</button>
+
+        <p class="form-subtitle bottom-link">
+          Don't have an account?
+          <a href="CreateAcc.index.html" class="link-create">Create Account</a>
+        </p>
+
+      </form>
+
+    </section>
+
+  </main>
+  <script src="../js/Login.js"></script>
+</body>
+</html>
