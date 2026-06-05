@@ -1,0 +1,787 @@
+/* =====================================================================
+   ContactVault — Dashboard / Global Theme
+   ---------------------------------------------------------------------
+   Dark "Midnight Slate" theme with a frosted-glass sidebar.
+
+   HOW THIS IS ORGANISED (and how to reuse it on other pages):
+   1. DESIGN TOKENS  -> everything lives in :root as CSS variables.
+                        Change a value once here and it updates app-wide.
+   2. RESET + BASE   -> page background, typography, a11y helpers.
+   3. LAYOUT         -> .app-container / .sidebar / .workspace.
+   4. COMPONENTS     -> header, search, cards, buttons, modals.
+   5. RESPONSIVE + MOTION PREFERENCES at the bottom.
+
+   To theme another page: link this file, reuse the tokens
+   (e.g. var(--accent-primary), var(--space-4), .glass-panel idea),
+   and you get the same look for free. No class/ID names were changed,
+   so existing JS hooks and the linked stylesheet contract still hold.
+   ===================================================================== */
+
+/* Optional display font for headings. Falls back gracefully to the
+   system stack if the network can't reach Google Fonts, so it will
+   never block your backend-served pages. Remove this line if your
+   deployment must be fully offline. */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap');
+
+:root {
+    /* --- Core surfaces (dark, layered — never pure black) --- */
+    --bg-base: #0f172a;        /* Deep slate — page base                */
+    --bg-surface: #1e293b;     /* Elevated slate — cards, inputs        */
+    --bg-elevated: #273449;    /* Highest layer — hover/active surfaces */
+
+    /* --- Glassmorphism (frosted sidebar / overlays) --- */
+    --glass-bg: rgba(15, 23, 42, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    --glass-blur: 16px;
+
+    /* --- Accents (chosen for WCAG contrast on dark surfaces) --- */
+    --accent-primary: #38bdf8; /* Sky blue   — links, focus, primary CTA */
+    --accent-hover: #0ea5e9;
+    --accent-soft: rgba(56, 189, 248, 0.12); /* tinted fills / icon wells */
+    --accent-text: #0f172a;    /* Dark text on the light accent (AAA)    */
+    --success: #34d399;        /* Spare token for success states         */
+    --danger: #f87171;         /* Red — lightened for AA on dark         */
+    --danger-hover: #ef4444;
+
+    /* --- Typography --- */
+    --text-main: #f8fafc;      /* Off-white — ~16:1 on base (AAA)        */
+    --text-muted: #a3b2c7;     /* Cool grey — ~6:1, passes AA on cards   */
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-display: "Sora", var(--font-body); /* headings / brand        */
+    /* Legacy alias kept so any older rules referencing it still resolve */
+    --font-stack: var(--font-body);
+
+    /* --- Spacing scale (4px base) --- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 40px;
+
+    /* --- Radius & geometry --- */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 999px;
+    --border-subtle: rgba(255, 255, 255, 0.1);
+
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+    /* --- Motion --- */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+
+    /* --- Z-index scale (predictable stacking) --- */
+    --z-sidebar: 10;
+    --z-header: 5;
+    --z-modal: 1000;
+
+    /* --- Background (swap per page by overriding these vars) ---
+       Self-contained CSS gradient mesh: no external image, no broken
+       links, works offline. Soft coloured glows sit over the dark base
+       and show through the frosted sidebar.
+       Prefer a photo instead? Set --bg-image to:
+         url('your-image-url') and bump --bg-overlay opacity to ~0.92. */
+    --bg-image:
+        radial-gradient(at 12% 18%, rgba(56, 189, 248, 0.12) 0px, transparent 45%),
+        radial-gradient(at 88% 12%, rgba(129, 140, 248, 0.12) 0px, transparent 42%),
+        radial-gradient(at 78% 88%, rgba(56, 189, 248, 0.10) 0px, transparent 45%),
+        radial-gradient(at 22% 92%, rgba(52, 211, 153, 0.07) 0px, transparent 40%);
+    --bg-overlay: linear-gradient(160deg, rgba(15, 23, 42, 0.35) 0%, rgba(11, 17, 32, 0.72) 100%);
+}
+
+/* =====================================================================
+   RESET + BASE
+   ===================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-main);
+    /* Dark gradient over an abstract background keeps text readable
+       while letting the image show through the frosted sidebar. */
+    background-image: var(--bg-overlay), var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: var(--bg-base); /* solid fallback before image loads */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Distinctive heading face, applied everywhere headings appear. */
+h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+}
+
+/* --- Accessibility helpers ----------------------------------------- */
+
+/* Visible, consistent focus ring for keyboard users on every element.
+   Uses :focus-visible so it never shows on plain mouse clicks. */
+:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* Screen-reader-only utility (e.g. for a "Skip to content" link or
+   invisible labels). Add class="sr-only" in markup to use it. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =====================================================================
+   LAYOUT
+   ===================================================================== */
+.app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ----------------------------------
+   SIDEBAR (FROSTED GLASS)
+----------------------------------- */
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-right: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-5) var(--space-4);
+    z-index: var(--z-sidebar);
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-7);
+    padding: 0 var(--space-3);
+    color: var(--accent-primary);
+}
+
+.brand-logo h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.sidebar-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: var(--space-3) var(--space-4);
+    display: block;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.sidebar-nav li.active a,
+.sidebar-nav a:hover,
+.sidebar-nav a:focus-visible {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--accent-primary);
+}
+
+/* Subtle marker on the current page for orientation (a11y: not the
+   only cue — colour + weight change too). */
+.sidebar-nav li.active a {
+    box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 0 var(--space-3);
+}
+
+.logout-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+.logout-link:hover,
+.logout-link:focus-visible {
+    color: var(--danger);
+}
+
+/* ----------------------------------
+   WORKSPACE & HEADER
+----------------------------------- */
+.workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-7);
+    background: rgba(15, 23, 42, 0.4);
+    border-bottom: 1px solid var(--border-subtle);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+}
+
+/* --- Search --- */
+.search-container {
+    flex: 1;
+    max-width: 600px;
+}
+
+.search-container form {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-1) var(--space-4);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.search-container form:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.search-container input {
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    padding: var(--space-1);
+}
+
+.search-container input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent-primary);
+    color: var(--accent-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) 18px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.search-field-select {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background-color: var(--bg-base);
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--transition-base);
+}
+
+.search-field-select:focus-visible {
+    border-color: var(--accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+/* --- User controls --- */
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text-main);
+}
+
+.user-name {
+    font-weight: 600;
+}
+
+/* =====================================================================
+   MAIN CONTENT & CONTACT CARDS
+   ===================================================================== */
+.main-content {
+    padding: var(--space-7);
+}
+
+.widget-header {
+    margin-bottom: var(--space-5);
+}
+
+.widget-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-1);
+    font-weight: 600;
+}
+
+.contact-count-label {
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* --- Empty state --- */
+.empty-state-card {
+    background-color: var(--bg-surface);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 60px var(--space-7);
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+/* Honour the [hidden] attribute even though display is set above. */
+.empty-state-card[hidden] {
+    display: none;
+}
+
+.empty-state-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background-color: var(--accent-soft);
+    color: var(--accent-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--space-5);
+}
+
+.empty-state-icon-wrapper svg {
+    width: 40px;
+    height: 40px;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-2);
+    color: var(--text-main);
+}
+
+.empty-state-description {
+    color: var(--text-muted);
+    margin-bottom: var(--space-5);
+}
+
+/* --- Contact list & cards (cards are injected by dashboard.js) --- */
+.contact-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 600px;
+}
+
+/* BUGFIX: the list starts with the [hidden] attribute in markup, but
+   display:flex above would override it and show an empty list. This
+   restores the intended hidden-until-populated behaviour. */
+.contact-list[hidden] {
+    display: none;
+}
+
+.contact-card {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) 20px;
+    cursor: pointer;
+    transition: border-color var(--transition-base),
+                background-color var(--transition-base),
+                transform var(--transition-base),
+                box-shadow var(--transition-base);
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-elevated);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    outline: none;
+}
+
+.contact-card .contact-name {
+    font-size: 1rem;
+    margin-bottom: 2px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.contact-card .contact-detail {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.contact-list .no-results {
+    color: var(--text-muted);
+    padding: 20px;
+}
+
+/* =====================================================================
+   BUTTONS
+   ===================================================================== */
+/* Base primary button. .add-contact-btn keeps its name for JS/markup;
+   .primary-btn (used on the empty-state button) now shares the style. */
+.primary-btn,
+.add-contact-btn {
+    background-color: var(--accent-primary);
+    color: var(--accent-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) 20px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: background-color var(--transition-base), transform var(--transition-fast);
+}
+
+.primary-btn:hover,
+.add-contact-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.primary-btn:active,
+.add-contact-btn:active {
+    transform: scale(0.98);
+}
+
+/* =====================================================================
+   MODALS (FROSTED OVERLAY)
+   ===================================================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    z-index: var(--z-modal);
+}
+
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal-box {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.modal-close {
+    border: none;
+    background: transparent;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-base);
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+    color: var(--accent-primary);
+}
+
+/* --- Modal forms --- */
+.add-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.add-contact-form input {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-main);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) 14px;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-base);
+}
+
+.add-contact-form input::placeholder {
+    color: var(--text-muted);
+}
+
+.add-contact-form input:focus {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-elevated);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.add-contact-form .add-contact-btn {
+    align-self: flex-start;
+    margin-top: var(--space-2);
+}
+
+.add-contact-result {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* --- Modal actions (edit / delete) --- */
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-5);
+}
+
+.modal-actions[hidden] {
+    display: none;
+}
+
+.danger-btn {
+    background-color: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.danger-btn:hover,
+.danger-btn:focus-visible {
+    background-color: var(--danger);
+    color: var(--accent-text);
+}
+
+.modal-confirm {
+    margin-top: var(--space-5);
+    text-align: center;
+    background-color: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+}
+
+.modal-confirm[hidden] {
+    display: none;
+}
+
+.modal-confirm-text {
+    margin-bottom: var(--space-4);
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.modal-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+}
+
+.confirm-yes-btn {
+    background-color: var(--danger);
+    color: var(--accent-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.confirm-yes-btn:hover {
+    background-color: var(--danger-hover);
+}
+
+.confirm-no-btn {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.confirm-no-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* =====================================================================
+   RESPONSIVE  — sidebar collapses to a top bar on narrow screens
+   ===================================================================== */
+@media (max-width: 820px) {
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .brand-logo {
+        margin-bottom: 0;
+    }
+
+    .sidebar-nav ul {
+        flex-direction: row;
+    }
+
+    .sidebar-nav li.active a {
+        box-shadow: inset 0 -3px 0 var(--accent-primary);
+    }
+
+    .sidebar-footer {
+        margin-top: 0;
+        margin-left: auto;
+    }
+
+    .workspace {
+        overflow-y: visible;
+        box-shadow: none;
+    }
+
+    .top-header {
+        flex-wrap: wrap;
+        padding: var(--space-4);
+    }
+
+    .main-content {
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 520px) {
+    .brand-logo h1 {
+        display: none; /* keep the logo icon, drop the wordmark when tight */
+    }
+
+    .search-field-select {
+        display: none; /* search input + button stay; refine field on larger screens */
+    }
+}
+
+/* =====================================================================
+   MOTION PREFERENCES — respect users who disable animations (a11y)
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .contact-card:hover,
+    .contact-card:focus-visible {
+        transform: none;
+    }
+}

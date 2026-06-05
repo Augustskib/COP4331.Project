@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ContactVault — Create Account</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/CreateAcc.Styles.css" />
+</head>
+
+<body>
+  <main class="page-wrap">
+
+    <section class="form-panel" aria-labelledby="register-heading">
+
+      <header class="header-text">
+        <h1 class="header-title" id="register-heading">Create Account</h1>
+        <p class="header-subtitle">Create an account to continue</p>
+      </header>
+
+      <form
+        class="form-pane active"
+        id="pane-register"
+        method="POST"
+        action="/LAMPAPI/Registration.php"
+        novalidate
+      >
+
+        <div
+          class="alert"
+          id="register-alert"
+          role="alert"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="reg-firstname">First Name</label>
+            <input
+              type="text"
+              id="reg-firstname"
+              name="firstName"
+              placeholder="e.g. Rick"
+              autocomplete="given-name"
+              required
+              aria-required="true"
+              aria-describedby="register-alert"
+            />
+          </div>
+
+          <div class="field">
+            <label for="reg-lastname">Last Name</label>
+            <input
+              type="text"
+              id="reg-lastname"
+              name="lastName"
+              placeholder="e.g. Leinecker"
+              autocomplete="family-name"
+              required
+              aria-required="true"
+              aria-describedby="register-alert"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="reg-username">Username</label>
+          <input
+            type="text"
+            id="reg-username"
+            name="login"
+            placeholder="e.g. RickL"
+            autocomplete="username"
+            required
+            aria-required="true"
+            aria-describedby="register-alert"
+          />
+        </div>
+
+        <div class="field">
+          <label for="reg-password">Password</label>
+          <input
+            type="password"
+            id="reg-password"
+            name="password"
+            placeholder="At least 8 characters"
+            autocomplete="new-password"
+            minlength="8"
+            required
+            aria-required="true"
+            aria-describedby="register-alert"
+          />
+        </div>
+
+        <button class="submit-btn" id="register-btn" type="submit">Create Account</button>
+
+        <p class="form-subtitle bottom-link">
+          Already have an account?
+          <a href="index.html" class="link-create">Sign In</a>
+        </p>
+
+      </form>
+
+    </section>
+
+  </main>
+  <script src="../js/CreateAccount.js"></script>
+</body>
+</html>

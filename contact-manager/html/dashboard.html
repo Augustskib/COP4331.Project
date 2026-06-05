@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-------------------
+            Navigation
+        --------------------->
+        <aside class="sidebar">
+            <div class="brand-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                <h1>Contact Manager</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="#add-contact">Add Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#logout" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <!-------------------------------
+                        Header
+            -------------------------------->
+            <header class="top-header">
+                <div class="search-container">
+                    <form action="/search" method="GET">
+                        <input type="search" id="contact-search" name="q" placeholder="Search contacts...">
+                        <!-- brandon's code: visible search button + field selector -->
+                        <button type="submit" class="search-btn">Search</button>
+                        <select id="search-field" aria-label="Choose what to search by" name="field" class="search-field-select">
+                            <option value="first_name">First Name</option>
+                            <option value="last_name">Last Name</option>
+                            <option value="email">Email</option>
+                            <option value="number">Number</option>
+                        </select>
+                        <!-- end brandon's code -->
+                    </form>
+                </div>
+
+                <div class="user-controls">
+       
+                    <div class="user-profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round-icon lucide-circle-user-round"><path d="M17.925 20.056a6 6 0 0 0-11.851.001"/><circle cx="12" cy="11" r="4"/><circle cx="12" cy="12" r="10"/></svg>                        <div class="user-info">
+                            <span class="user-name">Jaden</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-------------------
+                Your Contacts
+            --------------------->
+            <main class="main-content">
+
+                <section class="contacts-widget">
+    
+                    <header class="widget-header">
+                        <!-- brandon's code: ids so JS can swap heading/count text in place -->
+                        <h2 id="widget-title">Your Contacts</h2>
+                        <span class="contact-count-label" id="contact-count"></span>
+                        <!-- end brandon's code -->
+                    </header>
+
+                    <div class="empty-state-card" id="empty-state">
+    
+                        <div class="empty-state-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-contact-icon lucide-contact"><path d="M16 2v2"/><path d="M7 22v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><path d="M8 2v2"/><circle cx="12" cy="11" r="3"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+                        </div>
+
+                        <button class="primary-btn add-contact-btn" id="add-first-contact-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="plus-icon">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Contact
+                        </button>
+
+                    </div>
+
+                    <!-- brandon's code: live results list, populated by JS on search -->
+                    <ul class="contact-list" id="contact-list" hidden></ul>
+                    <!-- end brandon's code -->
+
+                    <!-- <footer class="widget-footer">
+                        <button id="load-more-btn">
+                            Load more 
+                            <span class="chevron-down">⌄</span>
+                        </button>
+                    </footer> -->
+
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- brandon's code: add-contact modal popup (CREATE via AJAX) -->
+    <div class="modal-overlay" id="add-contact-modal" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
+            <header class="modal-header">
+                <h2 id="add-modal-title">Add Contact</h2>
+                <button type="button" class="modal-close" id="add-modal-close" aria-label="Close">&times;</button>
+            </header>
+            <form id="add-contact-form" class="add-contact-form">
+                <input type="text"  id="add-first-name" placeholder="First name">
+                <input type="text"  id="add-last-name"  placeholder="Last name">
+                <input type="email" id="add-email"      placeholder="Email">
+                <input type="tel"   id="add-phone"      placeholder="Phone (###-###-####)">
+                <button type="submit" class="add-contact-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="plus-icon">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Contact
+                </button>
+                <span id="add-contact-result" class="add-contact-result"></span>
+            </form>
+        </div>
+    </div>
+    <!-- end brandon's code -->
+
+    <!-- brandon's code: contact modal (EDIT / DELETE via AJAX) -->
+    <div class="modal-overlay" id="contact-modal" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+            <header class="modal-header">
+                <h2 id="contact-modal-title">Contact</h2>
+                <button type="button" class="modal-close" id="contact-modal-close" aria-label="Close">&times;</button>
+            </header>
+
+            <div class="add-contact-form">
+                <input type="text"  id="edit-first-name" placeholder="First name">
+                <input type="text"  id="edit-last-name"  placeholder="Last name">
+                <input type="email" id="edit-email"      placeholder="Email">
+                <input type="tel"   id="edit-phone"      placeholder="Phone (###-###-####)">
+                <span id="edit-contact-result" class="add-contact-result"></span>
+            </div>
+
+            <!-- Normal action row: Delete on the left, Edit (save) on the right. -->
+            <div class="modal-actions" id="contact-actions">
+                <button type="button" class="danger-btn" id="contact-delete-btn">Delete</button>
+                <button type="button" class="add-contact-btn" id="contact-edit-btn">Edit</button>
+            </div>
+
+            <!-- Confirm row: appears after Delete is pressed. -->
+            <div class="modal-confirm" id="contact-confirm-delete" hidden>
+                <p class="modal-confirm-text">Are you sure you want to remove this contact?</p>
+                <div class="modal-confirm-buttons">
+                    <button type="button" class="confirm-no-btn" id="confirm-delete-no">No</button>
+                    <button type="button" class="confirm-yes-btn" id="confirm-delete-yes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end brandon's code -->
+<script src="../js/dashboard.js"></script>
+</body>
+</html>
