@@ -486,6 +486,68 @@ h1, h2, h3 {
 }
 
 /* =====================================================================
+   LOAD MORE  — secondary action under the contact list. Injected by
+   dashboard.js as #load-more-btn, with an optional #load-more-status
+   message beneath it when a "Load More" fetch fails.
+   ===================================================================== */
+.load-more-btn {
+    display: block;
+    width: 100%;
+    max-width: 1000px;          /* line up with .contact-list's width */
+    margin-top: var(--space-4);
+    padding: var(--space-3) 20px;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-base),
+                border-color var(--transition-base),
+                color var(--transition-base),
+                transform var(--transition-fast);
+}
+
+.load-more-btn:hover,
+.load-more-btn:focus-visible {
+    background-color: var(--bg-elevated);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    outline: none;
+}
+
+.load-more-btn:active {
+    transform: scale(0.99);
+}
+
+/* "Loading…" state — dashboard.js sets the disabled property while a
+   page request is in flight. */
+.load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* Honour the [hidden] attribute even though display is set above — same
+   pattern as .contact-list and .modal-overlay elsewhere in this file. */
+.load-more-btn[hidden] {
+    display: none;
+}
+
+/* Inline error shown beneath the button if a "Load More" fetch fails. */
+.load-more-status {
+    max-width: 1000px;
+    margin-top: var(--space-2);
+    color: var(--danger);
+    font-size: 0.9rem;
+}
+
+.load-more-status[hidden] {
+    display: none;
+}
+
+/* =====================================================================
    BUTTONS
    ===================================================================== */
 /* Base primary button. .add-contact-btn keeps its name for JS/markup;
