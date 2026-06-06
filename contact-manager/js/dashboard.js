@@ -37,7 +37,7 @@ const redirectToLogin = () => {
 /**
  * Hydrates `session` from localStorage. Redirects to the login page when no
  * valid userId is stored; otherwise greets the user by first name.
- * @returns {void}
+ * @returns {boolean} true when a valid session exists, false if we redirected.
  */
 function readSession() {
   const stored = localStorage.getItem('userId');
@@ -47,13 +47,14 @@ function readSession() {
 
   if (!session.userId || session.userId < 1 || Number.isNaN(session.userId)) {
     redirectToLogin();
-    return;
+    return false;
   }
 
   const nameSpan = document.querySelector('.user-name');
   if (nameSpan && session.firstName) {
     nameSpan.textContent = session.firstName;
   }
+  return true;
 }
 
 /**
@@ -248,8 +249,12 @@ async function fetchPage({ append, token }) {
       } else {
         appendResults(results);
       }
+    } else if (results.length === 0 && !term) {
+      // No search filter and nothing came back -> this user has no contacts yet.
+      // Show the "add your first contact" card rather than a "no matches" line.
+      showEmptyState();
     } else {
-      // Page 1: NO_RECORDS_ERROR becomes a friendly empty state ('' error).
+      // Page 1 of a search, or a populated all-contacts view.
       renderResults(results, { term, field, error: '' });
     }
 
@@ -305,34 +310,38 @@ function refreshCountLabel() {
  */
 function createContactCard(contact) {
   const fullName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
-  const detail = contact.phone || contact.email || '';
+  const phoneNum = contact.phone;
+  const email = contact.email;
 
-  const li = document.createElement('li');
-  li.className = 'contact-card';
-  li.dataset.id = contact.id;
-  li.tabIndex = 0; // keyboard-focusable
-  li.setAttribute('role', 'button');
-  li.innerHTML = `
+  const div = document.createElement('div');
+  div.className = 'contact-card';
+  div.dataset.id = contact.id;
+  div.tabIndex = 0; // keyboard-focusable
+  div.setAttribute('role', 'button');
+  div.innerHTML = `
     <div class="contact-info">
       <h3 class="contact-name"></h3>
-      <p class="contact-detail"></p>
+      <p class="contact-phoneNum"></p>
+	  <p class="contact-email"></p>
     </div>`;
 
   // textContent (not innerHTML) so a contact's data can't inject markup.
-  li.querySelector('.contact-name').textContent = fullName;
-  li.querySelector('.contact-detail').textContent = detail;
+  div.querySelector('.contact-name').textContent = fullName;
+  div.querySelector('.contact-phoneNum').textContent = phoneNum;
+  div.querySelector('.contact-email').textContent = email;
+
 
   // Clicking (or Enter/Space on) the card opens the edit/delete popup.
   const open = () => openContactModal(contact);
-  li.addEventListener('click', open);
-  li.addEventListener('keydown', (event) => {
+  div.addEventListener('click', open);
+  div.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       open();
     }
   });
 
-  return li;
+  return div;
 }
 
 /**
@@ -347,7 +356,7 @@ function renderResults(results, { term, field, error }) {
   const emptyState = document.getElementById('empty-state');
   const list = document.getElementById('contact-list');
 
-  title.textContent = 'Search results';
+  title.textContent = term ? 'Search results' : 'All contacts';
   count.textContent = error || buildCountLabel(results.length, term, field);
 
   emptyState.hidden = true;
@@ -375,6 +384,32 @@ function appendResults(results) {
   const list = document.getElementById('contact-list');
   results.forEach((contact) => list.appendChild(createContactCard(contact)));
   refreshCountLabel();
+}
+
+/**
+ * Reveals the "add your first contact" empty-state card and hides the list.
+ * Used when the unfiltered startup load comes back with zero contacts.
+ * @returns {void}
+ */
+function showEmptyState() {
+  const title = document.getElementById('widget-title');
+  const count = document.getElementById('contact-count');
+  const emptyState = document.getElementById('empty-state');
+  const list = document.getElementById('contact-list');
+
+  if (title) {
+    title.textContent = 'Your contacts';
+  }
+  if (count) {
+    count.textContent = '';
+  }
+  if (list) {
+    list.hidden = true;
+    list.replaceChildren();
+  }
+  if (emptyState) {
+    emptyState.hidden = false;
+  }
 }
 
 // ===========================================================================
@@ -699,7 +734,7 @@ function on(element, type, handler) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  readSession(); // login guard + greeting
+  const loggedIn = readSession(); // login guard + greeting
 
   // Load More button: create it (hidden) if the markup doesn't already have one,
   // and bind its click exactly once.
@@ -763,4 +798,12 @@ document.addEventListener('DOMContentLoaded', () => {
       closeContactModal();
     }
   });
+
+  // Populate the home screen on load. A blank search term sends an empty search
+  // object, which the backend treats as "match all", so this shows the user's
+  // contacts (page 1) with Load More ready. Guarded so we don't fire a doomed
+  // request when readSession() has already redirected to the login page.
+  if (loggedIn) {
+    searchContacts();
+  }
 });
