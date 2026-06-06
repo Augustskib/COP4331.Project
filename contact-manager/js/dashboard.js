@@ -9,6 +9,14 @@ const loginPage = 'index.html';
 // Contacts must match this phone shape: ###-###-####.
 const PHONE_PATTERN = /^\d{3}-\d{3}-\d{4}$/;
 
+// Server-side page size. SearchContacts.php hardcodes LIMIT 20, so this is the
+// number of records one page request returns. Keep it in sync with the backend.
+const PAGE_LIMIT = 20;
+
+// The backend returns this exact string (not an empty list) when a page has no
+// rows. On page 1 that's "no matches"; on a later page it's "end of data".
+const NO_RECORDS_ERROR = 'No Records Found';
+
 // Logged-in user, hydrated from localStorage on load by readSession().
 // Grouped behind one binding so the (reassigned) fields live on a const object
 // instead of polluting the shared global scope with bare `firstName`/`lastName`.
@@ -124,7 +132,7 @@ function validateContactFields({ firstName, lastName, email, phone }) {
 }
 
 // ===========================================================================
-//  SEARCH (READ)  — wired into the in-place results list on the dashboard.
+//  SEARCH (READ)  — paginated "Load More" strategy.
 // ===========================================================================
 
 // The <select> value -> the API search key. The API's search object uses
@@ -143,30 +151,134 @@ const FIELD_LABELS = {
   number: 'Number',
 };
 
+// Single source of truth for the active search. `currentPage` starts at 1 and
+// is bumped by Load More. `token` is a sequence number: a fresh search bumps it
+// so any still-in-flight request from a previous search/page is discarded when
+// it returns (prevents stale results racing in out of order).
+const searchState = {
+  term: '',
+  field: 'first_name',
+  key: 'firstName',
+  currentPage: 1,
+  isFetchingMore: false,
+  token: 0,
+};
+
 /**
- * Reads the search box + field selector and renders matching contacts.
- * A blank term lists everything for the current user.
+ * Runs a brand-new search: resets to page 1, clears the list and the button,
+ * then fetches and renders the first page.
  * @returns {Promise<void>}
  */
 async function searchContacts() {
-  const term = readInput('contact-search');
   const field = document.getElementById('search-field').value;
-  const key = FIELD_TO_KEY[field] || 'firstName';
+  Object.assign(searchState, {
+    term: readInput('contact-search'),
+    field,
+    key: FIELD_TO_KEY[field] || 'firstName',
+    currentPage: 1,
+    isFetchingMore: false,
+    token: searchState.token + 1, // invalidate anything already in flight
+  });
 
-  // The API treats an absent field as "match all".
+  await fetchPage({ append: false, token: searchState.token });
+}
+
+/**
+ * Fetches the next page and appends it to the existing list. Guarded so rapid
+ * clicks can't fire overlapping requests.
+ * @returns {Promise<void>}
+ */
+async function loadMore() {
+  if (searchState.isFetchingMore) {
+    return;
+  }
+  searchState.isFetchingMore = true;
+  searchState.currentPage += 1;
+
+  await fetchPage({ append: true, token: searchState.token });
+}
+
+/**
+ * Core fetch used by both initial search and Load More.
+ * @param {{append: boolean, token: number}} options
+ *   append - true to add to the list, false to replace it (page 1).
+ *   token  - the searchState.token at dispatch time, used to detect supersession.
+ * @returns {Promise<void>}
+ */
+async function fetchPage({ append, token }) {
+  const { term, key, field, currentPage } = searchState;
   const search = term ? { [key]: term } : {};
 
+  clearLoadMoreStatus();
+  setLoadMoreLoading(true);
+
   try {
-    const data = await apiPost('SearchContacts', { userId: session.userId, search });
-    const error = data.error || '';
-    renderResults(error ? [] : data.results || [], { term, field, error });
+    const data = await apiPost('SearchContacts', {
+      userId: session.userId,
+      search,
+      page: currentPage,
+    });
+
+    // A newer search started while we were waiting — drop this response.
+    if (token !== searchState.token) {
+      return;
+    }
+
+    const results = data.results || [];
+    const apiError = data.error || '';
+
+    // A genuine backend error (not the empty-page sentinel).
+    if (apiError && apiError !== NO_RECORDS_ERROR) {
+      if (append) {
+        searchState.currentPage -= 1; // this page didn't load; allow a retry
+        setLoadMoreStatus(apiError);
+        toggleLoadMore(true);
+      } else {
+        renderResults([], { term, field, error: apiError });
+        toggleLoadMore(false);
+      }
+      return;
+    }
+
+    // From here, apiError is either '' or NO_RECORDS_ERROR (treated as "no more").
+    if (append) {
+      if (apiError === NO_RECORDS_ERROR) {
+        // We asked for a page past the end (total was an exact multiple of 20).
+        searchState.currentPage -= 1;
+      } else {
+        appendResults(results);
+      }
+    } else {
+      // Page 1: NO_RECORDS_ERROR becomes a friendly empty state ('' error).
+      renderResults(results, { term, field, error: '' });
+    }
+
+    // Fewer than a full page (or the end sentinel) => nothing left to fetch.
+    const hasMore = apiError !== NO_RECORDS_ERROR && results.length === PAGE_LIMIT;
+    toggleLoadMore(hasMore);
   } catch (err) {
-    renderResults([], { term, field, error: err.message });
+    if (token !== searchState.token) {
+      return;
+    }
+    if (append) {
+      searchState.currentPage -= 1; // roll back so the retry refetches this page
+      setLoadMoreStatus(`Couldn't load more: ${err.message}`);
+      toggleLoadMore(true);
+    } else {
+      renderResults([], { term, field, error: err.message });
+      toggleLoadMore(false);
+    }
+  } finally {
+    if (token === searchState.token) {
+      searchState.isFetchingMore = false;
+      setLoadMoreLoading(false);
+    }
   }
 }
 
 /**
- * Builds the "N results for ..." summary line.
+ * Builds the "N results for ..." summary line. With Load More this reflects how
+ * many are currently loaded, not a grand total (the API doesn't return one).
  * @param {number} count
  * @param {string} term
  * @param {string} field
@@ -177,6 +289,13 @@ function buildCountLabel(count, term, field) {
   const label = FIELD_LABELS[field] || field;
   const scope = term ? ` for "${term}" in ${label}` : '';
   return `${count} ${noun}${scope}`;
+}
+
+/** Recomputes the count line from the number of cards currently rendered. */
+function refreshCountLabel() {
+  const count = document.getElementById('contact-count');
+  const shown = document.querySelectorAll('#contact-list .contact-card').length;
+  count.textContent = buildCountLabel(shown, searchState.term, searchState.field);
 }
 
 /**
@@ -217,7 +336,7 @@ function createContactCard(contact) {
 }
 
 /**
- * Swaps the heading to "Search results" and fills the contact list.
+ * Replaces the list with a fresh page-1 render (clears previous results first).
  * @param {Array<Object>} results - Contacts to render.
  * @param {{term: string, field: string, error: string}} context - Display context.
  * @returns {void}
@@ -244,6 +363,105 @@ function renderResults(results, { term, field, error }) {
   }
 
   results.forEach((contact) => list.appendChild(createContactCard(contact)));
+}
+
+/**
+ * Appends a page of contacts to the existing list (Load More) and updates the
+ * count line to reflect the new total shown.
+ * @param {Array<Object>} results
+ * @returns {void}
+ */
+function appendResults(results) {
+  const list = document.getElementById('contact-list');
+  results.forEach((contact) => list.appendChild(createContactCard(contact)));
+  refreshCountLabel();
+}
+
+// ===========================================================================
+//  LOAD-MORE BUTTON  — created lazily after the list, then toggled.
+// ===========================================================================
+
+/**
+ * Returns the Load More button, creating it (hidden) just after the contact
+ * list if it isn't already in the markup. The click handler is attached once
+ * during wire-up, so this never double-binds.
+ * @returns {?HTMLButtonElement}
+ */
+function ensureLoadMoreButton() {
+  const existing = document.getElementById('load-more-btn');
+  if (existing) {
+    return existing;
+  }
+
+  const list = document.getElementById('contact-list');
+  if (!list) {
+    return null;
+  }
+
+  const btn = document.createElement('button');
+  btn.id = 'load-more-btn';
+  btn.type = 'button';
+  btn.className = 'load-more-btn';
+  btn.textContent = 'Load More';
+  btn.hidden = true;
+  list.insertAdjacentElement('afterend', btn);
+  return btn;
+}
+
+/**
+ * Shows or hides the Load More button.
+ * @param {boolean} show
+ * @returns {void}
+ */
+function toggleLoadMore(show) {
+  const btn = ensureLoadMoreButton();
+  if (btn) {
+    btn.hidden = !show;
+  }
+}
+
+/**
+ * Reflects the in-flight state on the button (disabled + label) without
+ * changing its visibility.
+ * @param {boolean} isLoading
+ * @returns {void}
+ */
+function setLoadMoreLoading(isLoading) {
+  const btn = ensureLoadMoreButton();
+  if (!btn) {
+    return;
+  }
+  btn.disabled = isLoading;
+  btn.textContent = isLoading ? 'Loading…' : 'Load More';
+}
+
+/**
+ * Shows a small status message under the button (used for Load More failures).
+ * @param {string} message
+ * @returns {void}
+ */
+function setLoadMoreStatus(message) {
+  const btn = ensureLoadMoreButton();
+  if (!btn) {
+    return;
+  }
+  let status = document.getElementById('load-more-status');
+  if (!status) {
+    status = document.createElement('p');
+    status.id = 'load-more-status';
+    status.className = 'load-more-status';
+    btn.insertAdjacentElement('afterend', status);
+  }
+  status.textContent = message;
+  status.hidden = false;
+}
+
+/** Hides the Load More status message. @returns {void} */
+function clearLoadMoreStatus() {
+  const status = document.getElementById('load-more-status');
+  if (status) {
+    status.hidden = true;
+  }
 }
 
 // ===========================================================================
@@ -398,7 +616,8 @@ function showDeleteConfirm() {
 }
 
 /**
- * Validates the popup fields and saves the edit.
+ * Validates the popup fields and saves the edit. On success, re-runs the
+ * search from page 1 so the visible list reflects the change.
  * @returns {Promise<void>}
  */
 async function saveContactEdit() {
@@ -430,7 +649,7 @@ async function saveContactEdit() {
     resultSpan.textContent = 'Changes saved.';
     setTimeout(() => {
       closeContactModal();
-      searchContacts(); // refresh the list to show the update
+      searchContacts(); // refresh from page 1 to show the update
     }, 800);
   } catch (err) {
     resultSpan.textContent = err.message;
@@ -455,7 +674,7 @@ async function confirmDeleteContact() {
       return;
     }
     closeContactModal();
-    searchContacts(); // refresh the list; the contact is gone
+    searchContacts(); // refresh from page 1; the contact is gone
   } catch (err) {
     resultSpan.textContent = err.message;
     showEditActions();
@@ -481,6 +700,10 @@ function on(element, type, handler) {
 
 document.addEventListener('DOMContentLoaded', () => {
   readSession(); // login guard + greeting
+
+  // Load More button: create it (hidden) if the markup doesn't already have one,
+  // and bind its click exactly once.
+  on(ensureLoadMoreButton(), 'click', loadMore);
 
   // Search form: intercept submit so it doesn't navigate away.
   on(document.querySelector('.search-container form'), 'submit', (event) => {
