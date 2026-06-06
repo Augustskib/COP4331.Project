@@ -4,7 +4,7 @@ const urlBase = 'http://contactmanager7.xyz/LAMPAPI';
 const extension = 'php';
 
 // Where to send the user when they're not logged in / when they log out.
-const loginPage = 'index.html';
+const loginPage = '../html/login.html';
 
 // Contacts must match this phone shape: ###-###-####.
 const PHONE_PATTERN = /^\d{3}-\d{3}-\d{4}$/;
