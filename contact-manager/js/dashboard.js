@@ -4,7 +4,7 @@ const urlBase = 'http://contactmanager7.xyz/LAMPAPI';
 const extension = 'php';
 
 // Where to send the user when they're not logged in / when they log out.
-const loginPage = '../html/login.html';
+const loginPage = 'index.html';
 
 // Contacts must match this phone shape: ###-###-####.
 const PHONE_PATTERN = /^\d{3}-\d{3}-\d{4}$/;
@@ -303,6 +303,116 @@ function refreshCountLabel() {
   count.textContent = buildCountLabel(shown, searchState.term, searchState.field);
 }
 
+// ---------------------------------------------------------------------------
+//  LETTER AVATARS  — each contact gets a colored circle with their initial,
+//  derived from the name at render time (no database column, no image files).
+// ---------------------------------------------------------------------------
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// Saturated mid-tones that read well with dark letter text on this theme.
+const AVATAR_COLORS = [
+  '#38bdf8', // sky (accent)
+  '#818cf8', // indigo
+  '#34d399', // green
+  '#fbbf24', // amber
+  '#f472b6', // pink
+  '#2dd4bf', // teal
+  '#a78bfa', // violet
+  '#f87171', // coral
+];
+
+// Dark letter on the light/saturated fills — same pairing as the buttons.
+const AVATAR_TEXT_COLOR = '#0f172a'; // matches --accent-text
+// Quiet fill used when no initial can be derived (a blank placeholder slot).
+const AVATAR_PLACEHOLDER_BG = '#273449'; // matches --bg-elevated
+
+/**
+ * Returns a single uppercase initial for a contact, falling back through
+ * first name -> last name -> email. Returns '' when nothing usable exists,
+ * which the avatar renders as a blank (letter-less) placeholder.
+ * @param {{firstName?: string, lastName?: string, email?: string}} contact
+ * @returns {string} One uppercase character, or '' if none can be derived.
+ */
+function getInitial(contact) {
+  const source =
+    (contact.firstName || '').trim() ||
+    (contact.lastName || '').trim() ||
+    (contact.email || '').trim();
+  if (!source) {
+    return '';
+  }
+  // Array.from grabs a whole character (handles multi-byte names / emoji)
+  // instead of half of a surrogate pair.
+  return Array.from(source)[0].toUpperCase();
+}
+
+/**
+ * Deterministically maps a contact to one palette color, so the same person
+ * always gets the same color and different people stay visually distinct.
+ * @param {{firstName?: string, lastName?: string}} contact
+ * @returns {string} A hex color from AVATAR_COLORS.
+ */
+function pickAvatarColor(contact) {
+  const seed = `${contact.firstName || ''}${contact.lastName || ''}`;
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash + seed.charCodeAt(i)) % AVATAR_COLORS.length;
+  }
+  return AVATAR_COLORS[hash];
+}
+
+/**
+ * Builds a decorative letter-avatar SVG: a colored circle with the contact's
+ * initial centered on it. With no initial, the circle renders as a neutral,
+ * letter-less placeholder. Marked aria-hidden because the name sits beside it
+ * as real text.
+ * @param {Object} contact
+ * @returns {SVGSVGElement}
+ */
+function createAvatar(contact) {
+  const letter = getInitial(contact);
+  const fill = letter ? pickAvatarColor(contact) : AVATAR_PLACEHOLDER_BG;
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', 'contact-avatar');
+  svg.setAttribute('viewBox', '0 0 40 40');
+  svg.setAttribute('width', '44');
+  svg.setAttribute('height', '44');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  // Inline so the avatar lays out correctly even without a CSS rule; move these
+  // to a .contact-avatar block in dashboard.css if you'd rather theme it there.
+  svg.style.flexShrink = '0';
+  svg.style.marginRight = 'var(--space-4, 16px)';
+
+  const circle = document.createElementNS(SVG_NS, 'circle');
+  circle.setAttribute('cx', '20');
+  circle.setAttribute('cy', '20');
+  circle.setAttribute('r', '20');
+  circle.setAttribute('fill', fill);
+  svg.appendChild(circle);
+
+  // No letter -> leave the circle blank (the placeholder slot).
+  if (letter) {
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', '20');
+    text.setAttribute('y', '20');
+    text.setAttribute('text-anchor', 'middle'); // horizontal centering
+    text.setAttribute('dominant-baseline', 'central'); // vertical centering
+    text.setAttribute('fill', AVATAR_TEXT_COLOR);
+    text.setAttribute('font-size', '18');
+    text.setAttribute('font-weight', '600');
+    // font-family must go through CSS (var() isn't resolved in SVG attributes).
+    text.style.fontFamily = 'var(--font-display, sans-serif)';
+    // textContent, not markup, so a name can't inject anything.
+    text.textContent = letter;
+    svg.appendChild(text);
+  }
+
+  return svg;
+}
+
 /**
  * Creates a single keyboard-accessible contact card list item.
  * @param {{id: (number|string), firstName: string, lastName: string, email: string, phone: string}} contact
@@ -310,38 +420,37 @@ function refreshCountLabel() {
  */
 function createContactCard(contact) {
   const fullName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
-  const phoneNum = contact.phone;
-  const email = contact.email;
+  const detail = contact.phone || contact.email || '';
 
-  const div = document.createElement('div');
-  div.className = 'contact-card';
-  div.dataset.id = contact.id;
-  div.tabIndex = 0; // keyboard-focusable
-  div.setAttribute('role', 'button');
-  div.innerHTML = `
+  const li = document.createElement('li');
+  li.className = 'contact-card';
+  li.dataset.id = contact.id;
+  li.tabIndex = 0; // keyboard-focusable
+  li.setAttribute('role', 'button');
+  li.innerHTML = `
     <div class="contact-info">
       <h3 class="contact-name"></h3>
-      <p class="contact-phoneNum"></p>
-	  <p class="contact-email"></p>
+      <p class="contact-detail"></p>
     </div>`;
 
   // textContent (not innerHTML) so a contact's data can't inject markup.
-  div.querySelector('.contact-name').textContent = fullName;
-  div.querySelector('.contact-phoneNum').textContent = phoneNum;
-  div.querySelector('.contact-email').textContent = email;
+  li.querySelector('.contact-name').textContent = fullName;
+  li.querySelector('.contact-detail').textContent = detail;
 
+  // Letter avatar sits to the left of the text block (.contact-card is flex).
+  li.prepend(createAvatar(contact));
 
   // Clicking (or Enter/Space on) the card opens the edit/delete popup.
   const open = () => openContactModal(contact);
-  div.addEventListener('click', open);
-  div.addEventListener('keydown', (event) => {
+  li.addEventListener('click', open);
+  li.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       open();
     }
   });
 
-  return div;
+  return li;
 }
 
 /**
