@@ -4,7 +4,7 @@ const urlBase = 'http://contactmanager7.xyz/LAMPAPI';
 const extension = 'php';
 
 // Where to send the user when they're not logged in / when they log out.
-const loginPage = 'index.html';
+const loginPage = '../html/login.html';
 
 // Contacts must match this phone shape: ###-###-####.
 const PHONE_PATTERN = /^\d{3}-\d{3}-\d{4}$/;
@@ -420,7 +420,8 @@ function createAvatar(contact) {
  */
 function createContactCard(contact) {
   const fullName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
-  const detail = contact.phone || contact.email || '';
+  const phone = contact.phone;
+  const email = contact.email;
 
   const li = document.createElement('li');
   li.className = 'contact-card';
@@ -429,16 +430,22 @@ function createContactCard(contact) {
   li.setAttribute('role', 'button');
   li.innerHTML = `
     <div class="contact-info">
-      <h3 class="contact-name"></h3>
-      <p class="contact-detail"></p>
+      <div class="contact-header">
+        <h3 class="contact-name"></h3>
+      </div>
+      <div class="contact-details">
+        <p class="contact-phone"></p>
+        <p class="contact-email"></p>
+      </div>
     </div>`;
 
   // textContent (not innerHTML) so a contact's data can't inject markup.
   li.querySelector('.contact-name').textContent = fullName;
-  li.querySelector('.contact-detail').textContent = detail;
+  li.querySelector('.contact-phone').textContent = phone;
+  li.querySelector('.contact-email').textContent = email;
 
   // Letter avatar sits to the left of the text block (.contact-card is flex).
-  li.prepend(createAvatar(contact));
+  li.querySelector('.contact-header').prepend(createAvatar(contact));
 
   // Clicking (or Enter/Space on) the card opens the edit/delete popup.
   const open = () => openContactModal(contact);

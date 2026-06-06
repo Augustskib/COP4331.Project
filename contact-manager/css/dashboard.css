@@ -449,8 +449,8 @@ h1, h2, h3 {
 
 .contact-card {
     display: flex;
-    align-items: center;
-    min-height: 96px;                 /* gives each card a consistent body */
+    align-items: flex-start;
+    min-height: 200px;                 /* gives each card a consistent body */
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -461,6 +461,25 @@ h1, h2, h3 {
                 transform var(--transition-base),
                 box-shadow var(--transition-base);
 }
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.contact-header {               /* avatar + name on one row */
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.contact-details {              /* phone above email */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
 
 .contact-card:hover,
 .contact-card:focus-visible {
@@ -473,8 +492,8 @@ h1, h2, h3 {
 
 /* Make the avatar a touch bigger to suit the larger card. */
 .contact-card .contact-avatar {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
 }
 
 /* Lets long emails wrap instead of pushing the card wider (flex items
@@ -484,17 +503,18 @@ h1, h2, h3 {
 }
 
 .contact-card .contact-name {
-    font-size: 1.125rem;              /* ~18px */
+    font-size: 1.3rem;              /* ~18px */
     font-weight: 600;
     color: var(--text-main);
     margin-bottom: var(--space-1);
+    margin-top: 15px;
     overflow-wrap: anywhere;
 }
 
 /* NOTE: dashboard.js renders the phone/email line with class .contact-detail,
    so styling .contact-phoneNum / .contact-email had no effect. Targeting the
    real class here. */
-.contact-card .contact-detail {
+.contact-card .contact-phone, .contact-email {
     color: var(--text-muted);
     font-size: 0.95rem;
     overflow-wrap: anywhere;
