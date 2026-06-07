@@ -1,0 +1,440 @@
+/* ==========================================================
+   ContactVault — Login + Create Account
+   ----------------------------------------------------------
+   Re-themed to match the dashboard's "Midnight Slate" UI:
+   dark slate base, sky-blue accent, Sora display font.
+
+   The auth card is now a FROSTED-GLASS panel sitting over a
+   layered background, so a galaxy/star image can show THROUGH
+   the UI. The background stack is, bottom to top:
+       --bg-base    (solid colour, loads instantly)
+       --bg-image   (your galaxy photo OR the built-in CSS mesh)
+       --bg-overlay (dark-blue wash that keeps text readable)
+       body::before (a fine starfield for extra depth)
+
+   TO USE YOUR OWN IMAGE: set --bg-image to
+       url('path/to/galaxy.jpg')
+   and bump the --bg-overlay opacity toward ~0.85 if the photo
+   is bright. Nothing else needs to change.
+
+   Page-specific spacing still lives under the body classes:
+       .login-page            (Login page)
+       .create-account-page   (Create Account page)
+   No class or ID names were changed, so existing JS hooks and
+   the linked-stylesheet contract still hold.
+========================================================== */
+
+/* Display font for headings — matches the dashboard. Falls back
+   to the system stack if Google Fonts is unreachable. */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap');
+
+/* ----------------------------------------------------------
+   GLOBAL RESET
+---------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------
+   THEME TOKENS — same design tokens as dashboard.css
+---------------------------------------------------------- */
+:root {
+  /* --- Core surfaces (dark, layered — never pure black) --- */
+  --bg-base: #0f172a;        /* Deep slate — page base                */
+  --bg-surface: #1e293b;     /* Elevated slate — inputs               */
+  --bg-elevated: #273449;    /* Highest layer — focus/hover surfaces  */
+
+  /* --- Glassmorphism (frosted auth card) --- */
+  --glass-bg: rgba(15, 23, 42, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  --glass-blur: 16px;
+
+  /* --- Accents --- */
+  --accent-primary: #38bdf8; /* Sky blue — links, focus, primary CTA  */
+  --accent-hover: #0ea5e9;
+  --accent-soft: rgba(56, 189, 248, 0.12);
+  --accent-text: #0f172a;    /* Dark text on the light accent (AAA)   */
+  --success: #34d399;
+  --danger: #f87171;
+
+  /* --- Typography --- */
+  --text-main: #f8fafc;
+  --text-muted: #a3b2c7;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Sora", var(--font-body);
+
+  /* --- Radius & geometry --- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+
+  /* --- Shadows --- */
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.3);
+
+  /* --- Motion --- */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+
+  /* --- Background ---------------------------------------------
+     Self-contained galaxy mesh: soft nebula glows over the dark
+     base. No external file, works offline. Swap for a photo by
+     setting this to url('...'). */
+  --bg-image: url(../assets/photo-1570284613060-766c33850e00.avif)
+}
+
+/* ----------------------------------------------------------
+   BODY — layered galaxy background + centers the card
+---------------------------------------------------------- */
+body {
+  font-family: var(--font-body);
+  color: var(--text-main);
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* overlay on top of the image on top of the solid fallback */
+  background-image: var(--bg-overlay), var(--bg-image);
+  background-color: var(--bg-base);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+
+  padding: 2rem 1rem;
+}
+
+/* Fine starfield layer for depth. Sits above the background but
+   behind the card. Two tiled dot patterns = near + far stars.
+   pointer-events:none so it never blocks clicks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.9) 0px, transparent 2px),
+    radial-gradient(1px 1px at 75% 20%, rgba(255,255,255,0.7) 0px, transparent 2px),
+    radial-gradient(1.5px 1.5px at 50% 65%, rgba(255,255,255,0.85) 0px, transparent 2px),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.6) 0px, transparent 2px),
+    radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,0.75) 0px, transparent 2px);
+  background-repeat: repeat;
+  background-size: 220px 220px, 320px 320px, 180px 180px, 280px 280px, 240px 240px;
+  opacity: 0.5;
+}
+
+/* ----------------------------------------------------------
+   PAGE-WRAP — the frosted-glass auth card
+   (min-height differs per page — see overrides at bottom)
+---------------------------------------------------------- */
+.page-wrap {
+  position: relative;          /* sits above the starfield */
+  z-index: 1;
+
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow);
+
+  width: 420px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 2.5rem;
+}
+
+/* ----------------------------------------------------------
+   FORM PANEL — container for all form elements
+---------------------------------------------------------- */
+.form-panel {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ----------------------------------------------------------
+   HEADER TEXT — title + subtitle
+   (margin-bottom differs per page — see overrides at bottom)
+---------------------------------------------------------- */
+.header-text {
+  text-align: center;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.7rem;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+  margin-bottom: 0.9rem;
+}
+
+.header-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.45;
+}
+
+/* ----------------------------------------------------------
+   FORM TITLES + SUBTITLES (inside form panes)
+---------------------------------------------------------- */
+.form-title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+}
+
+.form-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+}
+
+/* Center the bottom "Don't have an account?" line */
+.bottom-link {
+  text-align: center;
+  width: 100%;
+  margin-top: 2rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ----------------------------------------------------------
+   LINKS — Create Account, Forgot Password, etc.
+---------------------------------------------------------- */
+.link-create {
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.link-create:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   FIELD ROW — two side-by-side fields (Create Account only)
+---------------------------------------------------------- */
+.field-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.field-row .field {
+  flex: 1;
+  margin-bottom: 1.3rem;
+}
+
+/* ----------------------------------------------------------
+   FORM FIELDS — labels + inputs
+   (.field margin-bottom differs per page — see overrides)
+---------------------------------------------------------- */
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 0.4rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-base);
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+}
+
+.field input:focus {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+/* ----------------------------------------------------------
+   PASSWORD ROW — "Password" + "Forgot password?"
+---------------------------------------------------------- */
+.password-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-base);
+}
+
+.forgot-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   CHECKBOX ROW — Remember Password / Terms checkbox
+   (margin-bottom differs per page — see overrides at bottom)
+---------------------------------------------------------- */
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.remember-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.remember-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ----------------------------------------------------------
+   SUBMIT BUTTON — "Sign In" / "Create Account"
+   Matches the dashboard primary button.
+---------------------------------------------------------- */
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent-primary);
+  color: var(--accent-text);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-base), transform var(--transition-fast);
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* ----------------------------------------------------------
+   ALERTS — success + error messages
+   Tinted fills built from the dashboard danger/success tokens.
+---------------------------------------------------------- */
+.alert {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.alert.error {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: var(--danger);
+  display: block;
+}
+
+.alert.success {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: var(--success);
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   FORM PANES — used for login/register switching
+---------------------------------------------------------- */
+.form-pane {
+  display: none;
+}
+
+.form-pane.active {
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   ACCESSIBILITY — carried over from the dashboard theme
+---------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================
+   PAGE-SPECIFIC OVERRIDES
+   ----------------------------------------------------------
+   Same four spacing values that differ between the two pages,
+   scoped by the body class. Geometry is unchanged from before.
+========================================================== */
+
+/* ---- Login page ---- */
+.login-page .page-wrap    { min-height: 420px; }
+.login-page .header-text  { margin-bottom: 2.4rem; }
+.login-page .field        { margin-bottom: 1.1rem; }
+.login-page .remember-row { margin-bottom: 0.9rem; }
+
+/* ---- Create Account page ---- */
+.create-account-page .page-wrap    { min-height: 540px; }
+.create-account-page .header-text  { margin-bottom: 3rem; }
+.create-account-page .field        { margin-bottom: 1.3rem; }
+.create-account-page .remember-row { margin-bottom: 1.4rem; }
+
+/* ----------------------------------------------------------
+   MOTION PREFERENCES — respect reduced-motion users (a11y)
+---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
