@@ -463,6 +463,7 @@ h1 div {
     display: flex;
     align-items: flex-start;
     min-height: 200px;                 /* gives each card a consistent body */
+    height: 100%;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);

@@ -422,13 +422,21 @@ function createContactCard(contact) {
   const fullName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
   const phone = contact.phone;
   const email = contact.email;
-
+ 
+  // The <li> stays a plain list item so the <ul> remains valid for screen
+  // readers (a list may only directly contain list items). The clickable
+  // "button" behaviour and all the card styling now live on this inner wrapper,
+  // so we never override the <li>'s implicit listitem role with role="button".
   const li = document.createElement('li');
-  li.className = 'contact-card';
-  li.dataset.id = contact.id;
-  li.tabIndex = 0; // keyboard-focusable
-  li.setAttribute('role', 'button');
-  li.innerHTML = `
+  li.className = 'contact-card-cell';
+ 
+  const card = document.createElement('div');
+  card.className = 'contact-card';
+  card.dataset.id = contact.id;
+  card.tabIndex = 0; // keyboard-focusable
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', `Open ${fullName || 'contact'}`);
+  card.innerHTML = `
     <div class="contact-info">
       <div class="contact-header">
         <h3 class="contact-name"></h3>
@@ -444,11 +452,11 @@ function createContactCard(contact) {
         </div>
       </div>
     </div>`;
-
+ 
   // textContent (not innerHTML) so a contact's data can't inject markup.
-  li.querySelector('.contact-name').textContent = fullName;
+  card.querySelector('.contact-name').textContent = fullName;
   // Phone → tap-to-call
-  const phoneEl = li.querySelector('.contact-phone');
+  const phoneEl = card.querySelector('.contact-phone');
   if (phone) {
     const phoneLink = document.createElement('a');
     phoneLink.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
@@ -457,9 +465,9 @@ function createContactCard(contact) {
     phoneLink.addEventListener('click', (e) => e.stopPropagation()); // don't open modal
     phoneEl.appendChild(phoneLink);
   }
-
+ 
   // Email → tap-to-email
-  const emailEl = li.querySelector('.contact-email');
+  const emailEl = card.querySelector('.contact-email');
   if (email) {
     const emailLink = document.createElement('a');
     emailLink.href = `mailto:${email}`;
@@ -468,21 +476,22 @@ function createContactCard(contact) {
     emailLink.addEventListener('click', (e) => e.stopPropagation());
     emailEl.appendChild(emailLink);
   }
-
+ 
   // Letter avatar sits to the left of the text block (.contact-card is flex).
-  li.querySelector('.contact-header').prepend(createAvatar(contact));
-
+  card.querySelector('.contact-header').prepend(createAvatar(contact));
+ 
   // Clicking (or Enter/Space on) the card opens the edit/delete popup.
   const open = () => openContactModal(contact);
-  li.addEventListener('click', open);
-  li.addEventListener('keydown', (event) => {
+  card.addEventListener('click', open);
+  card.addEventListener('keydown', (event) => {
     if (event.target.closest('a')) return;   // let links handle their own keys
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       open();
     }
   });
-
+ 
+  li.appendChild(card);
   return li;
 }
 
