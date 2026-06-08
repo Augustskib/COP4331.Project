@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // The Redirect: Wait 2 seconds, then send them to the login page
                 setTimeout(() => {
-                    window.location.href = "index.html";
+                    window.location.href = "login.html";
                 }, 2000);
             }
 

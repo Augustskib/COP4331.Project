@@ -26,7 +26,7 @@
         <p class="header-subtitle">Please enter your username and password to continue</p>
       </header>
 
-      <form class="form-pane active" id="pane-login" method="POST" action="/api/auth/login" novalidate>
+      <form class="form-pane active" id="pane-login">
 
         <!-- error/success notification via js -->
         <div class="alert" id="login-alert" role="alert" aria-live="polite" aria-atomic="true">
@@ -36,13 +36,13 @@
         <!-- username field -->
         <div class="field">
           <label for="login-username" class="form-title">Username</label>
-          <input type="text" id="login-username" name="username" placeholder="e.g. Jaden" autocomplete="username" required aria-required="true" aria-describedby="login-alert"/>
+          <input type="text" id="login-username" name="username" placeholder="e.g. Jaden" autocomplete="username" aria-required="true" aria-describedby="login-alert" required/>
         </div>
 
         <!-- Password field-->
         <div class="field">
           <label for="login-password" class="form-title">Password</label>
-          <input type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password" required aria-required="true" aria-describedby="login-alert"/>
+          <input type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password" aria-required="true" aria-describedby="login-alert" required/>
         </div>
 
         <!-- type="submit" — lets the form submit on Enter key too -->
