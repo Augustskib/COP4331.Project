@@ -447,8 +447,27 @@ function createContactCard(contact) {
 
   // textContent (not innerHTML) so a contact's data can't inject markup.
   li.querySelector('.contact-name').textContent = fullName;
-  li.querySelector('.contact-phone').textContent = phone;
-  li.querySelector('.contact-email').textContent = email;
+  // Phone → tap-to-call
+  const phoneEl = li.querySelector('.contact-phone');
+  if (phone) {
+    const phoneLink = document.createElement('a');
+    phoneLink.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
+    phoneLink.textContent = phone;                 // safe
+    phoneLink.className = 'contact-link';
+    phoneLink.addEventListener('click', (e) => e.stopPropagation()); // don't open modal
+    phoneEl.appendChild(phoneLink);
+  }
+
+  // Email → tap-to-email
+  const emailEl = li.querySelector('.contact-email');
+  if (email) {
+    const emailLink = document.createElement('a');
+    emailLink.href = `mailto:${email}`;
+    emailLink.textContent = email;
+    emailLink.className = 'contact-link';
+    emailLink.addEventListener('click', (e) => e.stopPropagation());
+    emailEl.appendChild(emailLink);
+  }
 
   // Letter avatar sits to the left of the text block (.contact-card is flex).
   li.querySelector('.contact-header').prepend(createAvatar(contact));
@@ -457,6 +476,7 @@ function createContactCard(contact) {
   const open = () => openContactModal(contact);
   li.addEventListener('click', open);
   li.addEventListener('keydown', (event) => {
+    if (event.target.closest('a')) return;   // let links handle their own keys
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       open();
