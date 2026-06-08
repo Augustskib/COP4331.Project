@@ -489,6 +489,14 @@ h1, h2, h3 {
     margin-left: 10px;
 }
 
+.contact-link {
+  color: inherit;
+  text-decoration: none;
+}
+.contact-link:hover {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
 
 .contact-card:hover,
 .contact-card:focus-visible {
