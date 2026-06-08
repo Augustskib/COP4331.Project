@@ -83,7 +83,8 @@
      Self-contained galaxy mesh: soft nebula glows over the dark
      base. No external file, works offline. Swap for a photo by
      setting this to url('...'). */
-  --bg-image: url(../assets/photo-1570284613060-766c33850e00.avif)
+  --bg-image: url(../assets/photo-1570284613060-766c33850e00.avif);
+  --bg-overlay: linear-gradient(160deg, rgba(15, 23, 42, 0.45) 0%, rgba(11, 17, 32, 0.78) 100%);
 }
 
 /* ----------------------------------------------------------
@@ -182,10 +183,12 @@ body::before {
 }
 
 .header-subtitle {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text-muted);
   text-align: center;
   line-height: 1.45;
+  margin-bottom: 15px;
+  margin-top: 20px;
 }
 
 /* ----------------------------------------------------------
@@ -196,7 +199,8 @@ body::before {
   font-size: 1.55rem;
   letter-spacing: -0.01em;
   color: var(--text-main);
-  margin-bottom: 0.35rem;
+  margin-top: 0.55rem;
+  margin-bottom: 0.55rem;
 }
 
 .form-subtitle {
@@ -239,7 +243,6 @@ body::before {
 
 .field-row .field {
   flex: 1;
-  margin-bottom: 1.3rem;
 }
 
 /* ----------------------------------------------------------
@@ -340,7 +343,7 @@ body::before {
   font-weight: 600;
   cursor: pointer;
   transition: background-color var(--transition-base), transform var(--transition-fast);
-  margin-top: 0.5rem;
+  margin-top: 2rem;
 }
 
 .submit-btn:hover {
